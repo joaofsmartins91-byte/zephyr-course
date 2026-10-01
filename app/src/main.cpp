@@ -29,10 +29,11 @@
 
 
 #include <stdio.h>
+#include <zephyr/sys/printk.h>
 
 int main(void)
 {
-	printf("Hello World!\n");
+	printk("Hello World!\n");
 
 	return 0;
 }
