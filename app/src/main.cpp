@@ -1,42 +1,44 @@
-#include <zephyr/drivers/gpio.h>
+#include <errno.h>
 #include <zephyr/drivers/sensor.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
-
 #define SLEEP_TIME_MS 1000
-
-/* The devicetree node identifier for the "app_led" alias. */
-#define LED_NODE DT_ALIAS(led2)
-
-static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED_NODE, gpios);
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
-namespace {
-	void test() {
-		const struct device *dev = DEVICE_DT_GET(DT_NODELABEL(our_driver0));
-		struct sensor_value val;
-		int ret = sensor_channel_get(dev, SENSOR_CHAN_ALL, &val);
-		LOG_INF("Channel ret: %d", ret);
-	}
-}
-
 int main(void)
 {
-	test();
-    bool led_state = true;
+    const struct device *dev = DEVICE_DT_GET(DT_NODELABEL(our_driver0));
+    struct sensor_value val;
+    bool led_is_on = false;
 
-    if (!gpio_is_ready_dt(&led)) return 0;
-
-    if (gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE) < 0) return 0;
+    if (!device_is_ready(dev)) {
+        LOG_ERR("LED sensor device is not ready");
+        return -ENODEV;
+    }
 
     while (1) {
-        if (gpio_pin_toggle_dt(&led) < 0) return 0;
+        int ret;
 
-        led_state = !led_state;
-        LOG_INF("LED state: %s", led_state ? "ON" : "OFF");
+        if (led_is_on) {
+            ret = sensor_channel_get(dev, SENSOR_CHAN_ALL, &val);
+            if (ret == 0) {
+                led_is_on = false;
+                LOG_INF("LED turned off");
+            } else {
+                LOG_ERR("sensor_channel_get failed: %d", ret);
+            }
+        } else {
+            ret = sensor_sample_fetch(dev);
+            if (ret == 0) {
+                led_is_on = true;
+                LOG_INF("LED turned on");
+            } else {
+                LOG_ERR("sensor_sample_fetch failed: %d", ret);
+            }
+        }
+
         k_msleep(SLEEP_TIME_MS);
     }
-    return 0;
 }
