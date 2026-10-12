@@ -25,7 +25,7 @@ int main(void)
             ret = sensor_channel_get(dev, SENSOR_CHAN_ALL, &val);
             if (ret == 0) {
                 led_is_on = false;
-                LOG_INF("LED turned off");
+                LOG_INF("LED turned off (channel get)");
             } else {
                 LOG_ERR("sensor_channel_get failed: %d", ret);
             }
@@ -33,7 +33,7 @@ int main(void)
             ret = sensor_sample_fetch(dev);
             if (ret == 0) {
                 led_is_on = true;
-                LOG_INF("LED turned on");
+                LOG_INF("LED turned on (sample fetch)");
             } else {
                 LOG_ERR("sensor_sample_fetch failed: %d", ret);
             }
