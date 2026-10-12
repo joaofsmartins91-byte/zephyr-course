@@ -2,6 +2,7 @@
 #include <zephyr/drivers/sensor.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include "our_driver.h"
 
 #define SLEEP_TIME_MS 1000
 
@@ -18,6 +19,22 @@ int main(void)
         return -ENODEV;
     }
 
+    int ret = our_driver_set_led_state(dev, true);
+    if (ret < 0) {
+        LOG_ERR("our_driver_set_led_state failed: %d", ret);
+        return ret;
+    }
+    LOG_INF("LED turned on (init test)\n\n");
+    k_msleep(5 * SLEEP_TIME_MS);
+
+    ret = our_driver_set_led_state(dev, false);
+    if (ret < 0) {
+        LOG_ERR("our_driver_set_led_state failed: %d", ret);
+        return ret;
+    }
+    LOG_INF("LED turned off (init test)\n\n");
+    k_msleep(5 * SLEEP_TIME_MS);
+
     while (1) {
         int ret;
 
@@ -25,7 +42,7 @@ int main(void)
             ret = sensor_channel_get(dev, SENSOR_CHAN_ALL, &val);
             if (ret == 0) {
                 led_is_on = false;
-                LOG_INF("LED turned off (channel get)");
+                LOG_INF("LED turned off (channel get)\n\n");
             } else {
                 LOG_ERR("sensor_channel_get failed: %d", ret);
             }
@@ -33,7 +50,7 @@ int main(void)
             ret = sensor_sample_fetch(dev);
             if (ret == 0) {
                 led_is_on = true;
-                LOG_INF("LED turned on (sample fetch)");
+                LOG_INF("LED turned on (sample fetch)\n\n");
             } else {
                 LOG_ERR("sensor_sample_fetch failed: %d", ret);
             }
