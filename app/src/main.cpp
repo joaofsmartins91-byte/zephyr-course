@@ -4,7 +4,7 @@
 #include <zephyr/logging/log.h>
 #include "our_driver.h"
 
-#define SLEEP_TIME_MS 1000
+#define SLEEP_TIME_MS 5000
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
@@ -25,7 +25,7 @@ int main(void)
         return ret;
     }
     LOG_INF("LED turned on (init test)\n\n");
-    k_msleep(5 * SLEEP_TIME_MS);
+    k_msleep(SLEEP_TIME_MS);
 
     ret = our_driver_set_led_state(dev, false);
     if (ret < 0) {
@@ -33,7 +33,7 @@ int main(void)
         return ret;
     }
     LOG_INF("LED turned off (init test)\n\n");
-    k_msleep(5 * SLEEP_TIME_MS);
+    k_msleep(SLEEP_TIME_MS);
 
     while (1) {
         int ret;
